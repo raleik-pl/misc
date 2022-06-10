@@ -64,7 +64,8 @@ export GIT_PS1_STATESEPARATOR=''
 export GIT_PS1_SHOWCOLORHINTS=1
 
 if [ "$color_prompt" = yes ]; then
-   PS1='$(if [[ "$VPN" == "true" ]]; then echo "vpn "; fi)${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$WSL_DISTRO_NAME\[\033[00m\] \[\033[01;34m\]\w\[\033[0m\]$(__git_ps1 " \e[1;33m%s")\[\033[0m\]$(if [[ $? == 0 ]]; then echo " $"; else echo -e " \e[31m$\e[0m"; fi) '
+   # $WSL_DISTR_NAME <> $HOST_IP
+   PS1='$(if [[ "$VPN" == "true" ]]; then echo "vpn "; fi)${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@$WSL_DISTRO_NAME\[\033[00m\] \[\033[01;34m\]\w\[\033[0m\]$(__git_ps1 " \e[1;33m┢%s")\[\033[0m\]$(if [[ $? == 0 ]]; then echo " $"; else echo -e " \e[31m$\e[0m"; fi) '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@$WSL_DISTRO_NAME:\w\$ '
 fi
@@ -141,11 +142,14 @@ vpnon() {
   # setup DISPLAY
   #HOST_NAME=N-20HEPF0XGEPG.nsn-intra.net
   #HOST_IP=$(host N-20HEPF0XGEPG.nsn-intra.net | awk '{ print $4 }')
-  #export DISPLAY=$HOST_IP:0.0
-  #export PULSE_SERVER=tcp:$HOST_IP
-  #export LIBGL_ALWAYS_INDIRECT=1
-  #export NO_AT_BRIDGE=1
-  #echo " * DISPLAY: $DISPLAY"
+  HOST_IP=$(pwsh.exe -Command "& {Get-NetAdapter |  Where-Object InterfaceDescription -like \"*AnyConnect*Virtual*Adapter*\" |   Get-NetIPAddress -AddressFamily IPv4 |  Select-Object -ExpandProperty IPAddress}")
+  export HOST_IP=$(echo -n ${HOST_IP::-1})
+  export DISPLAY=$HOST_IP:0.0
+  export PULSE_SERVER=tcp:$HOST_IP
+  export LIBGL_ALWAYS_INDIRECT=1
+  export NO_AT_BRIDGE=1
+  echo " * HOST_IP: $HOST_IP"
+  echo " * DISPLAY: $DISPLAY"
   echo " * VPN: $VPN"
 }
 
@@ -165,10 +169,15 @@ vpnoff() {
   export VPN=false
   # setup DISPLAY
   #export DISPLAY=host.docker.internal:0.0
-  #export PULSE_SERVER=tcp:host.docker.internal
-  #export LIBGL_ALWAYS_INDIRECT=1
-  #export NO_AT_BRIDGE=1
-  #echo " * DISPLAY: $DISPLAY"
+  #HOST_IP=$(pwsh.exe -Command "& {Get-NetAdapter |  Where-Object InterfaceDescription -like \"*AnyConnect*Virtual*Adapter*\" |   Get-NetIPAddress -AddressFamily IPv4 |  Select-Object -ExpandProperty IPAddress}")
+  #HOST_IP=$(echo -n ${HOST_IP::-1})
+  export HOST_IP=host.docker.internal
+  export DISPLAY=host.docker.internal:0.0
+  export PULSE_SERVER=tcp:host.docker.internal
+  export LIBGL_ALWAYS_INDIRECT=1
+  export NO_AT_BRIDGE=1
+  echo " * HOST_IP: $HOST_IP" 
+  echo " * DISPLAY: $DISPLAY"
   echo " * VPN: $VPN"
 }
 
@@ -192,8 +201,8 @@ export NVM_DIR="$HOME/.nvm"
 
 alias idea='~/idea-IU-212.5080.55/bin/idea.sh 2> ~/.idea/stderr 1> ~/.idea/stdout &'
 alias pycharm='~/pycharm-community-2021.2.1/bin/pycharm.sh 2> ~/.pycharm/stderr 1> ~/.pycharm/stdout &'
-
 alias mora='~/mora/mora.sh'
+alias hostip='echo $HOST_IP'
 
 export WINHOME=/mnt/c/Users/$USER
 cdh() {
