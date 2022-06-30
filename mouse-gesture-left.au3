@@ -3,7 +3,7 @@
 #include <Misc.au3>
 
 If _IsPressed(11) Then ; 11 is CTRL
-	Send("#^{LEFT}")
+	Send("#^{LEFT}") ; WIN+CRTL+LEFT is left virtual desktop
 Else
-	Send("#^`")
+	Send("#^`") ; WIN+CTRL+` for PowerToys Run
 EndIf
