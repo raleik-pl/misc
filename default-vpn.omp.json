@@ -1,0 +1,193 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "blocks": [
+    {
+      "name": "command error",
+      "alignment": "left",
+      "segments": [
+        {
+          "type": "text",
+          "background": "black",
+          "background_templates": [
+            "{{ if gt .Code 0 }}red{{end}}"
+          ],
+          "foreground": "black",
+          "foreground_templates": [
+            "{{ if gt .Code 0 }}white{{end}}",
+            "{{ if .Root }}red{{ end }}"
+          ],
+          "style": "accordion",
+          "powerline_symbol": "",
+          "template": "{{ if gt .Code 0 }} \uf00d {{ else if .Root }} \uf0e7 {{ else }}.{{ end }}"
+        },
+        {
+          "type": "text",
+          "background": "lightBlue",
+          "foreground": "lightBlue",
+          "style": "accordion",
+          "powerline_symbol": "\ue0b0",
+          "template": ""
+        },
+        {
+          "type": "text",
+          "background": "lightBlue",
+          "foreground": "blue",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "template": "{{ if .Env.VPN }}\uf132{{ end }}"
+        },
+        {
+          "name": "kubernetes",
+          "type": "kubectl",
+          "background": "lightBlue",
+          "foreground": "blue",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "template": "{{ if .Context }}\ufd31{{ end }}"
+        },
+        {
+          "name": "x server",
+          "type": "text",
+          "background": "lightBlue",
+          "foreground": "blue",
+          "style": "powerline",
+          "powerline_symbol": "\ue0b0",
+          "template": "{{ if .Env.X_SERVER }}\uf878{{ end }}"
+        },
+        {
+          "type": "text",
+          "background": "lightBlue",
+          "foreground": "lightBlue",
+          "style": "accordion",
+          "powerline_symbol": "\ue0b0",
+          "template": ""
+        },
+        {
+          "name": "path",
+          "type": "path",
+          "background": "black",
+          "foreground": "lightWhite",
+          "powerline_symbol": "\ue0b0",
+          "properties": {
+            "home_icon": "~",
+            "folder_icon": "\uf74a",
+            "hide_root_location": false,
+            "style": "agnoster_short",
+            "max_depth": 5
+          },
+          "style": "powerline",
+          "template": " \uf74a {{ path .Path .Location }} {{ if not .Writable }}<lightYellow>\uf83d</> {{ end }}"
+        }
+      ],
+      "type": "prompt"
+    },
+    {
+      "name": "right prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "name": "git repo",
+          "type": "git",
+          "background": "lightGreen",
+          "background_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}lightYellow{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}red{{ end }}",
+            "{{ if gt .Ahead 0 }}magenta{{ end }}",
+            "{{ if gt .Behind 0 }}lightMagenta{{end}}"
+          ],
+          "foreground": "black",
+          "foreground_templates": [
+            "{{ if or (.Working.Changed) (.Staging.Changed) }}black{{ end }}",
+            "{{ if and (gt .Ahead 0) (gt .Behind 0) }}white{{ end }}",
+            "{{ if or (gt .Ahead 0) (gt .Behind 0) }}black{{ end }}"
+          ],
+          "properties": {
+            "branch_max_length": 25,
+            "fetch_status": true,
+            "fetch_upstream_icon": true,
+            "truncate_symbol": "…"
+          },
+          "style": "diamond",
+          "leading_diamond": "\ue0b2",
+          "trailing_diamond": "",
+          "template": " {{ if .UpstreamURL }}{{ url .UpstreamIcon .UpstreamURL }}{{ end }}{{ .HEAD }}{{ .BranchStatus }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if .Staging.Changed }} \uf046 {{ .Staging.String }}{{ end }} "
+        }
+      ],
+      "type": "rprompt"
+    }
+  ],
+  "console_title_template": "{{if .Root }}root@{{ end }}{{ .Shell }} in {{ .PWD }}",
+  "final_space": true,
+  "palette": {
+    "black": "#262B44",
+    "blue": "#4B95E9",
+    "green": "#59C9A5",
+    "orange": "#F07623",
+    "red": "#D81E5B",
+    "white": "#E0DEF4",
+    "yellow": "#F3AE35"
+  },
+  "secondary_prompt": {
+    "background": "transparent",
+    "foreground": "black",
+    "template": "{{ if .Root }}\u2588<red,black>\uf0e7</>{{ end }}\u2588\ue0b0 "
+  },
+  "tooltips": [
+    {
+      "background": "black",
+      "foreground": "lightBlue",
+      "foreground_templates": [
+        "{{ if not .Env.X_SERVER }}red{{ end }}"
+      ],
+      "style": "diamond",
+      "type": "text",
+      "leading_diamond": "\ue0b6",
+      "trailing_diamond": "\ue0b4",
+      "template": "{{ if .Env.X_SERVER }}\uf878 {{ .Env.DISPLAY }}{{ end }}",
+      "tips": [
+        "disp",
+        "display"
+      ]
+    },
+    {
+      "background": "black",
+      "foreground": "lightBlue",
+      "style": "diamond",
+      "type": "text",
+      "leading_diamond": "\ue0b6",
+      "trailing_diamond": "\ue0b4",
+      "template": "\ue70f {{ .Env.HOST_IP }}",
+      "tips": [
+        "hostip"
+      ]
+    },
+    {
+      "background": "black",
+      "foreground": "lightBlue",
+      "foreground_templates": [
+        "{{ if not .Context }}red{{ end }}"
+      ],
+      "style": "powerline",
+      "type": "kubectl",
+      "leading_diamond": "\ue0b6",
+      "trailing_diamond": "\ue0b4",
+      "template": "{{ if .Context }}\ufd31 {{ .Context }}{{ if .Namespace }}:{{ .Namespace }}{{ end }}{{ end }}",
+      "tips": [
+        "kube",
+        "kubectl",
+        "minik",
+        "minikube"
+      ]
+    }
+  ],
+  "transient_prompt": {
+    "background": "black",
+    "foreground": "lightWhite",
+    "style": "diamond",
+    "leading_diamond": "",
+    "trailing_diamond": "\ue0b0",
+    "template": " {{ if .Root }}<red>\uf0e7</> {{ end }}\uf74a {{ .PWD }} <black,transparent>\ue0b0 </>",
+    "type": "text"
+  },
+  "version": 2
+}
