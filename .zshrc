@@ -5,6 +5,10 @@ SAVEHIST=10000
 
 bindkey -e
 bindkey '^H' backward-kill-word
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
+bindkey ';5D' backward-word
+bindkey ';5C' forward-word
 
 # End of lines configured by zsh-newuser-install
 # The following lines were added by compinstall
@@ -16,7 +20,7 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-unsetopt BEEP
+#unsetopt BEEP
 
 eval "$(oh-my-posh init zsh --config ~/.poshthemes/default-vpn.omp.json)"
 enable_poshtooltips
@@ -33,8 +37,8 @@ if [ -x /usr/bin/dircolors ]; then
     alias egrep='egrep --color=auto'
 fi
 
-alias ls='ls -CF --color=auto --group-directories-first'
-alias ll='ls -lah'
+alias ls='ls -aCF --color=auto --group-directories-first'
+alias ll='ls -lh'
 alias cdwin='cd /mnt/c/Users/$USER/\b'
 
 hostip() {
