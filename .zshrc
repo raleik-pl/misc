@@ -40,90 +40,58 @@ fi
 alias ls='ls -aCF --color=auto --group-directories-first'
 alias ll='ls -lh'
 alias cdwin='cd /mnt/c/Users/$USER/\b'
+alias proxy='. $HOME/proxy/proxy'
+alias proxyon='. $HOME/proxy/proxyon'
+alias proxyoff='. $HOME/proxy/proxyoff'
 
 hostip() {
   export HOST_IP=$(ipconfig.exe | grep 'vEthernet (WSL)' -A4 | cut -d":" -f 2 | tail -n1 | sed -e 's/\s*//g')
+  echo "  Host IP: $HOST_IP"
 }
 
 display() {
-  export DISPLAY=$HOST_IP:0.0
   export PULSE_SERVER=$HOST_IP
   export LIBGL_ALWAYS_INDIRECT=1
   export NO_AT_BRIDGE=1
-  echo " * HOST_IP: $HOST_IP"
-  echo " * DISPLAY: $DISPLAY"
   if nc -zw1 $HOST_IP 6000; then
-    export X_SERVER=on
+    export DISPLAY=$HOST_IP:0.0
   else
-    unset  X_SERVER
+    unset  DISPLAY
   fi
-  echo " * X_SERVER: ${X_SERVER:-off}"
+  echo "  Display: ${DISPLAY:-off}"
 }
 
-vpnon() {
-  # setup apt proxy
-  cp -f ~/vpn/proxy ~/vpn/proxy.conf
-  # setup env proxy
-  # export PROXY=http://10.144.1.10:8080
-  export PROXY=http://87.254.212.120:8080
-  export proxy=$PROXY
-  export HTTP_PROXY=$PROXY
-  export http_proxy=$PROXY
-  export HTTPS_PROXY=$PROXY
-  export https_proxy=$PROXY
-  export NO_PROXY=.nokia.net,.alcatel-lucent.com,localhost,127.0.0.1,192.168.59.0/24,192.168.39.0/24,192.168.49.0/24,10.96.0.0/12
-  export no_proxy=$NO_PROXY
-  echo " * PROXY: set"
-  export VPN=on
-  echo " * VPN: $VPN"
+pogoda() {
+  param=$(echo $* | sed 's/ /+/g')
+  curl "wttr.in/${param:-Dobroszyce}?n&lang=pl"
 }
 
-vpnoff() {
-  # unset apt proxy
-  cp -f ~/vpn/no-proxy ~/vpn/proxy.conf
-  # unset env proxy
-  unset PROXY
-  unset proxy
-  unset HTTP_PROXY
-  unset http_proxy
-  unset HTTPS_PROXY
-  unset https_proxy
-  unset NO_PROXY
-  unset no_proxy
-  echo " * PROXY: unset"
-  unset VPN
-  echo " * VPN: ${VPN:-off}"
+hibernate() {
+  for i in $(seq $1 -1 1); do
+    echo $i
+    sleep 1
+  done
+  echo "⏻ Hibernating in $1 seconds..."
+  return 0
 }
 
-vpn() {
-  echo " * Checking for VPN connection..."
-  wget -q -T 1 --spider google.com
-  #ping -w 1 192.168.1.1 > /dev/null
-  if [ $? -ne 0 ]; then
-    vpnon
-  else
-    vpnoff
-  fi
-  hostip
-  display
-}
-
-echo " * Starting wsl-vpnkit... "
+echo "  Starting wsl-vpnkit... "
 wsl.exe -d wsl-vpnkit service wsl-vpnkit start
 
-vpn
+hostip
+display
 
 source "/home/kielar/.rover/env"
 #echo -n "Starting Docker service..."
 sudo service docker start
 
-echo " * Eval minikube docker-env..."
+echo "  Eval minikube docker-env..."
 eval $(minikube -p minikube docker-env)
 
 SSH_ENV="$HOME/.ssh/agent-environment"
 
 function start_agent {
-    echo " * Initialising new SSH agent..."
+    echo "  Initialising new SSH agent..."
     /usr/bin/ssh-agent | sed 's/^echo/#echo/' > "${SSH_ENV}"
     chmod 600 "${SSH_ENV}"
     . "${SSH_ENV}" > /dev/null
@@ -139,3 +107,6 @@ if [ -f "${SSH_ENV}" ]; then
 else
     start_agent;
 fi
+
+export PATH="$HOME/.local/bin:$PATH"
+

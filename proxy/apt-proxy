@@ -1,4 +1,6 @@
 Acquire {
   HTTP::proxy "http://10.144.1.10:8080";
   HTTPS::proxy "http://10.144.1.10:8080";
+  FTP::proxy "http://10.144.1.10:8080";
+  SOCKS::proxy "http://10.144.1.10:8080";
 }

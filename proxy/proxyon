@@ -1,0 +1,101 @@
+SCRIPT_DIR=$(dirname "$0")
+
+proxy_host=87.254.212.120
+proxy_port=8080
+
+export PROXY=http://$proxy_host:$proxy_port
+
+export NO_PROXY=localhost,127.0.0.1,192.168.59.0/24,192.168.39.0/24,192.168.49.0/24,10.96.0.0/12,*.alcatel-lucent.com,*.int.net.nokia.com
+export HTTPS_PROXY=http://${proxy_host}:${proxy_port}
+export HTTP_PROXY=http://${proxy_host}:${proxy_port}
+export FTP_PROXY=http://${proxy_host}:${proxy_port}
+
+export no_proxy=localhost,127.0.0.1,192.168.59.0/24,192.168.39.0/24,192.168.49.0/24,10.96.0.0/12,*.alcatel-lucent.com,*.int.net.nokia.com
+export https_proxy=http://${proxy_host}:${proxy_port}
+export http_proxy=http://${proxy_host}:${proxy_port}
+export ftp_proxy=http://${proxy_host}:${proxy_port}
+
+docker_container_config_dir=${HOME}/.docker
+docker_container_config_file=${docker_container_config_dir}/config.json
+
+docker_daemon_dir=/etc/systemd/system/docker.service.d
+docker_daemon_proxy_file=${docker_daemon_dir}/http-proxy.conf
+
+gradle_config_dir=${HOME}/.gradle
+gradle_config_file=${gradle_config_dir}/gradle.properties
+
+yarn3_config_file=${HOME}/.yarnrc.yml
+
+docker_container_config="""{
+ \"proxies\":
+ {
+   \"default\":
+   {
+     \"httpProxy\": \"${HTTP_PROXY}\",
+     \"httpsProxy\": \"${HTTPS_PROXY}\",
+     \"ftpProxy\": \"${FTP_PROXY}\",
+     \"noProxy\": \"${NO_PROXY}\"
+   }
+ }
+}
+"""
+
+docker_daemon_config="""
+[Service]
+Environment="HTTP_PROXY=${HTTP_PROXY}"
+Environment="HTTPS_PROXY=${HTTPS_PROXY}"
+Environment="NO_PROXY=${NO_PROXY}"
+"""
+
+gradle_config="""
+systemProp.http.proxyHost=${proxy_host}
+systemProp.http.proxyPort=${proxy_port}
+systemProp.http.nonProxyHosts=${NO_PROXY}
+systemProp.https.proxyHost=${proxy_host}
+systemProp.https.proxyPort=${proxy_port}
+systemProp.https.nonProxyHosts=${NO_PROXY}
+"""
+
+yarn3_config="""httpProxy: "${HTTP_PROXY}"
+httpsProxy: "${HTTPS_PROXY}"
+"""
+
+# see https://docs.docker.com/network/proxy/
+# if [ -f "${docker_container_config_file}" ]; then
+#   echo "  Docker config file exists, skipped network proxy setting."
+# else
+  mkdir -p ${docker_container_config_dir} &&
+  echo "${docker_container_config}" > ${docker_container_config_file} &&
+  echo "  Docker network proxy set."
+# fi
+
+# see https://docs.docker.com/config/daemon/systemd/#httphttps-proxy
+# if [[ -f "${docker_daemon_proxy_file}" ]]; then
+#   echo "  Docker daemon proxy file exists, skipped daemon proxy setting."
+# else
+  sudo mkdir -p ${docker_daemon_dir} &&
+  sudo sh -c "echo \"${docker_daemon_config}\" > \"${docker_daemon_proxy_file}\"" &&
+  # sudo systemctl daemon-reload && # not in WSL
+  # sudo systemctl restart docker && # not in WSL
+  sudo cp ${SCRIPT_DIR}/docker /etc/default/docker # only in WSL
+  sudo service docker restart # only in WSL
+  echo "  Docker daemon proxy set."
+# fi
+
+# if [ -f "${yarn3_config_file}" ]; then
+#   echo "  Yarn config file exists, skipped proxy setting."
+# else
+  echo "${yarn3_config}" > ${yarn3_config_file} &&
+  echo "  Yarn proxy set."
+# fi
+
+# if [ -f "${gradle_config_file}" ]; then
+#   echo " ﳄ Gradle config file exists, skipped proxy setting."
+# else
+  mkdir -p ${gradle_config_dir} &&
+  sh -c "echo \"${gradle_config}\" > \"${gradle_config_file}\""
+  echo " ﳄ Gradle proxy set."
+# fi
+
+sudo cp -f ${SCRIPT_DIR}/apt-proxy /etc/apt/apt.conf.d/proxy.conf
+echo "  Apt proxy set."

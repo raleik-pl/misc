@@ -1,0 +1,56 @@
+SCRIPT_DIR=$(dirname "$0")
+
+unset PROXY
+unset NO_PROXY
+unset HTTPS_PROXY
+unset HTTP_PROXY
+unset FTP_PROXY
+unset no_proxy
+unset https_proxy
+unset http_proxy
+unset ftp_proxy
+
+docker_container_config_dir=${HOME}/.docker
+docker_container_config_file=${docker_container_config_dir}/config.json
+docker_container_config_file_bak=/tmp/config.json.$(date +%m%d%Y%H%M%S).bak
+
+docker_daemon_dir=/etc/systemd/system/docker.service.d
+docker_daemon_proxy_file=${docker_daemon_dir}/http-proxy.conf
+docker_daemon_proxy_file_bak=/tmp/http-proxy.conf.$(date +%m%d%Y%H%M%S).bak
+
+gradle_config_dir=${HOME}/.gradle
+gradle_config_file=${gradle_config_dir}/gradle.properties
+gradle_config_file_bak=${gradle_config_dir}/gradle.properties.$(date +%m%d%Y%H%M%S).bak
+
+yarn3_config_file=${HOME}/.yarnrc.yml
+yarn3_config_file_bak=${HOME}/.yarnrc.yml.$(date +%m%d%Y%H%M%S).bak
+
+
+if [ -f ${docker_container_config_file} ]; then
+  mv "${docker_container_config_file}" "${docker_container_config_file_bak}" &&
+  echo "  Docker network proxy unset."
+fi
+
+if [ -f ${docker_daemon_proxy_file} ]; then
+  sudo mv "${docker_daemon_proxy_file}" "${docker_container_config_file_bak}" &&
+    # sudo systemctl daemon-reload && # not in WSL
+    # sudo systemctl restart docker && # not in WSL
+    sudo rm -f /etc/default/docker # only in WSL
+    sudo service docker restart # only in WSL
+    echo "  Docker daemon proxy unset."
+fi
+
+if [ -f ${gradle_config_file} ]; then
+  sudo mv "${gradle_config_file}" "${gradle_config_file_bak}" &&
+  echo " ﳄ Gradle proxy unset."
+fi
+
+if [ -f ${yarn3_config_file} ]; then
+  mv "${yarn3_config_file}" "${yarn3_config_file_bak}" &&
+  echo "  Yarn proxy unset."
+fi
+
+if [ -f /etc/apt/apt.conf.d/proxy.conf ]; then
+  sudo rm -f /etc/apt/apt.conf.d/proxy.conf
+  echo "  Apt proxy unset."
+fi

@@ -1,0 +1,13 @@
+SCRIPT_DIR=$(dirname "$0")
+
+echo "  Checking if behind a proxy..."
+#wget -T 1 --spider https://repo.cci.nokia.net
+#ping -w 1 192.168.1.1 > /dev/null
+ping -c1 -w1 int.net.nokia.com > /dev/null 2>&1 # int.net.nokia.com
+if [ $? -eq 0 ]; then
+  . ${SCRIPT_DIR}/proxyon
+  echo "  Using proxy."
+else
+  . ${SCRIPT_DIR}/proxyoff
+  echo "  Not using proxy."
+fi

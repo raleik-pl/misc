@@ -1,0 +1,35 @@
+# Docker Upstart and SysVinit configuration file
+
+#
+# THIS FILE DOES NOT APPLY TO SYSTEMD
+#
+#   Please see the documentation for "systemd drop-ins":
+#   https://docs.docker.com/engine/admin/systemd/
+#
+
+# Customize location of Docker binary (especially for development testing).
+#DOCKERD="/usr/local/bin/dockerd"
+
+# Use DOCKER_OPTS to modify the daemon startup options.
+#DOCKER_OPTS="--dns 8.8.8.8 --dns 8.8.4.4"
+
+# If you need Docker to use an HTTP proxy, it can also be specified here.
+#export http_proxy="http://127.0.0.1:3128/"
+
+# This is also a handy place to tweak where Docker's temporary files go.
+#export DOCKER_TMPDIR="/mnt/bigdrive/docker-tmp"
+
+proxy_host=87.254.212.120
+proxy_port=8080
+
+export PROXY=http://$proxy_host:$proxy_port
+
+export NO_PROXY=localhost,127.0.0.1,192.168.59.0/24,192.168.39.0/24,192.168.49.0/24,10.96.0.0/12,*.alcatel-lucent.com,*.int.net.nokia.com
+export HTTPS_PROXY=http://${proxy_host}:${proxy_port}
+export HTTP_PROXY=http://${proxy_host}:${proxy_port}
+export FTP_PROXY=http://${proxy_host}:${proxy_port}
+
+export no_proxy=localhost,127.0.0.1,192.168.59.0/24,192.168.39.0/24,192.168.49.0/24,10.96.0.0/12,*.alcatel-lucent.com,*.int.net.nokia.com
+export https_proxy=http://${proxy_host}:${proxy_port}
+export http_proxy=http://${proxy_host}:${proxy_port}
+export ftp_proxy=http://${proxy_host}:${proxy_port}
